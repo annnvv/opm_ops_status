@@ -115,5 +115,11 @@
   winter <- subset(both, (both$mo == "12" | both$mo == "01" | both$mo == "02" | both$mo == "03"))
   winter$d <- as.POSIXct(winter$appl_date , format = "%Y-%m-%d")
   
+  # Generate a variable to each winter season (since a winter spans across two years)
+  winter$season <- NA
+  for(y in 1997:2017){
+    winter$season[winter$appl_date >= paste0(y, "-12-01") & winter$appl_date < paste0(y+1, "-04-01")] <- paste0("winter ", y, "-", y+1)
+  }
+  
   write.csv(winter, "data/final_dataset.csv", row.names = FALSE)
  
