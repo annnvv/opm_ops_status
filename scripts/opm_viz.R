@@ -2,18 +2,18 @@
   
   # Set working directory  
   setwd("C:/Users/Anna V/Documents/GitHub/opm_ops_status")
-
+  
   # Load Libraries
   library(ggplot2)
   library(scales)
   library(gganimate)
   library(magick)
   theme_set(theme_bw())
-
+  
   winter <- read.csv("data/final_dataset.csv", stringsAsFactors = FALSE)
   winter$d <- as.POSIXct(winter$appl_date, format = "%Y-%m-%d")
-
-    # Boxplot of Snow Fall by Year
+  
+  # Boxplot of Snow Fall by Year
   # "2003, 2010, and 2016 had days were there was more than 10 inches of snow"
   boxplot(snow~year,data = winter, main = "Snow by Year ", 
           xlab = "Year", ylab = "Snow Fall")
@@ -82,7 +82,6 @@
   seasons <- unique(winter$season)
   
   for(y in seasons){
-    #jpeg(paste0("images/", y, ".jpg"), width = 1024, height = 768)
     print(y)
     ggplot(winter[winter$season == y, ], aes(d, snow, color = status)) + 
       theme_bw() + 
@@ -97,14 +96,20 @@
            y = "Snowfall in inches",
            subtitle = "Measured at Ronald Reagan International Airport (DCA): USW00013743",
            caption = "data sources: https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/ and https://www.ncdc.noaa.gov/cdo-web/") 
-
-    ggsave(paste0("images/year_", y, ".jpg"), plot = last_plot(), 
+    
+    ggsave(paste0("images/", y, ".png"), plot = last_plot(), 
            width = 32, height = 20, units = "cm", dpi = 320)
   }
-
+  
   # put images together to create a gif, based on code from: 
   #https://stackoverflow.com/questions/53401370/very-confused-about-how-to-merge-two-images-to-create-a-gif
-    
+  
+  list.files(path = paste0(getwd(), "/images"), pattern = "*.png", full.names = T) %>% 
+    image_read %>% # reads each image file
+    image_join() %>% # joins image
+    image_animate(fps=0.05) %>% # animates, can opt for number of loops
+    image_write("merged_pngs.gif")
+  
   # -----------------------------------------------------------------#
   # # Barchart of Snow Fall and Government Operating Status
   # # av.note: doesn't look great hard to see data
