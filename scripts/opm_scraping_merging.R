@@ -1,11 +1,12 @@
-  # Set working directory  
-  setwd("C:/Users/Anna V/Desktop/R_Stuff/OPM/")
+  rm(list = ls())
   
-  # Libraries
+  # Set working directory  
+  setwd("C:/Users/Anna V/Documents/GitHub/opm_ops_status")
+
+  # Load Libraries
   library(ggplot2)
   library(lubridate)
-  theme_set(theme_bw())
-  
+
   # Load Data
   # this website was useful: https://statistics.berkeley.edu/computing/r-reading-webpages
   page <-  readLines("https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/")
@@ -21,10 +22,10 @@
   opm$lines <- gsub("<a href=", "", opm$lines)
   opm$lines <- substring(opm$lines, 9)
   
-  oth <- read.csv("opm_stuff.csv", header = TRUE)
+  oth <- read.csv("data/opm_stuff.csv", header = TRUE)
   
   # Merge Datasets
-  opm <- merge(opm, oth, by = "lines", all = TRUE)
+  opm <- merge(opm, oth, by = "lines", all.x = FALSE, all.y = TRUE)
   rm(oth, mypattern)
   opm <- subset(opm, delete == FALSE, drop = TRUE)
   
@@ -71,7 +72,7 @@
   # -----------------------------------------------------------------#
     # Show data from: https://www.ncdc.noaa.gov/cdo-web/ & https://www.ncdc.noaa.gov/cdo-web/search 
   # All snow data is from the DCA weather station, load snow data
-  snow <- read.csv("snow_original.csv", header = TRUE)
+  snow <- read.csv("data/snow_original.csv", header = TRUE)
   snow$DATE <- as.Date(snow$DATE, "%m/%d/%Y")
   snow$name <- paste(snow$NAME, snow$STATION, sep = " - ")
   snow <- snow[ , c(3:6)]
@@ -89,6 +90,7 @@
   
   # Re-order datasets to make more sense
   both <- both[ , c(1, 3, 8, 10, 9, 4, 5, 2, 6, 7)]
+  names(both)
   
   # Create Quarter variables with year and without year
   both$yq <- quarter(both$appl_date, with_year = TRUE)
@@ -96,7 +98,8 @@
   
   # Re-order quarter variables to be nearer to the date variable
   both <- both[ , c(1:3,11,12, 4:10)]
- 
+  names(both)
+  
   # Generating a month Variable
   both$mo <- substr(both$appl_date, start = 6, stop = 7)
   both <- both[ , c(1:2,13,3:12)]
@@ -109,52 +112,8 @@
   both$status <- as.factor(both$status)
   both$d <- as.POSIXlt(both$appl_date , format = "%Y-%m-%d")
   
-  # -----------------------------------------------------------------#
-  # Boxplot of Snow Fall by Year
-  boxplot(snow~year,data = winter, main = "Snow by Year ", 
-          xlab = "Year", ylab = "Snow Fall")
+  winter <- subset(both, (both$mo == "12" | both$mo == "01" | both$mo == "02" | both$mo == "03"))
+  winter$d <- as.POSIXct(winter$appl_date , format = "%Y-%m-%d")
   
-  color <- c("Shutdown" = "#9b0020", # Deep Red
-             "Closed" = "#be1337", # RED
-             "Early Dismissal" = "#da8707", # ORANGE
-             "Delayed Arrival" = "#f5d415", # YELLOW
-             "Unscheduled Leave" = "#71f23a", # GREEN 
-             "Open" = "#00b050", # GREEN
-             "Other" = "#a2a4a1", #Silver
-             "NA" = "#e2e2e2", # Grey
-             "Weekend" = "#0e1111" # Black 
-            )
-  breaks <- c("Shutdown", "Closed", "Delayed Arrival", 
-              "Early Dismissal", "Unscheduled Leave", 
-              "Open", "Other", "NA", "Weekend")
-
-  # Scatterplot of Snow Fall and Government Operating Status
-  ggplot(winter, aes(d, snow, color = status)) + 
-    theme_bw() + 
-    geom_point(size = 3) +
-    scale_y_continuous(breaks = c(0,3,6,9,12,15), limits = c(0,15)) +
-    scale_x_datetime(breaks = date_breaks("year")) + 
-    theme(text = element_text(size = 10), 
-          axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_color_manual(values = color) + 
-    labs(title = "Snow Fall and Government Operating Status", 
-         x = "Days (December-March)",
-         y = "Snowfall in inches",
-         subtitle = "Measured at Ronald Reagan International Airport (DCA): USW00013743",
-         caption = "data sources: https://www.ncdc.noaa.gov/cdo-web/ and https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/")
-  
-  # Barchart of Snow Fall and Government Operating Status
-  ggplot(winter, aes(d, snow)) + 
-    theme_bw() + 
-    #geom_point(size = 3) +
-    geom_bar(stat="identity", aes(fill = status)) +
-    scale_y_continuous(breaks = c(0,3,6,9,12,15), limits = c(0,15)) +
-    scale_x_datetime(breaks = date_breaks("year")) + 
-    theme(text = element_text(size = 10), 
-          axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_manual(values = color) + 
-    labs(title = "Snow Fall and Government Operating Status", 
-         x = "Days (December-March)",
-         y = "Snowfall in inches",
-         subtitle = "Measured at Ronald Reagan International Airport (DCA): USW00013743",
-         caption = "data sources: https://www.ncdc.noaa.gov/cdo-web/ and https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/")
+  write.csv(winter, "data/final_dataset.csv", row.names = FALSE)
+ 
