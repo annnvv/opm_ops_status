@@ -7,17 +7,22 @@
   library(ggplot2)
   library(scales)
   library(gganimate)
+  library(magick)
   theme_set(theme_bw())
 
   winter <- read.csv("data/final_dataset.csv", stringsAsFactors = FALSE)
   winter$d <- as.POSIXct(winter$appl_date, format = "%Y-%m-%d")
-  
 
-  # Boxplot of Snow Fall by Year
+    # Boxplot of Snow Fall by Year
   # "2003, 2010, and 2016 had days were there was more than 10 inches of snow"
   boxplot(snow~year,data = winter, main = "Snow by Year ", 
           xlab = "Year", ylab = "Snow Fall")
   
+  # summary statistics of snow fall for each year
+  for(y in 1998:2018){
+    print(paste0("Year ", y), digits = 1)
+    print(summary(winter[winter$year == y, "snow"]))
+  }
   
   # -----------------------------------------------------------------#
   # Static Scatterplot of Snow Fall and Government Operating Status
@@ -28,13 +33,13 @@
              "Unscheduled Leave" = "#71f23a", # GREEN 
              "Open" = "#00b050", # GREEN
              "Other" = "#a2a4a1", #Silver
-             "NA" = "#e2e2e2", # Grey
+             #"NA" = "#e2e2e2", # Grey
              "Weekend" = "#0e1111" # Black 
   )
   
   breaks <- c("Shutdown", "Closed", "Delayed Arrival", 
               "Early Dismissal", "Unscheduled Leave", 
-              "Open", "Other", "NA", "Weekend")
+              "Open", "Other",  "Weekend")#"NA",
   
   ggplot(winter, aes(d, snow, color = status)) + 
     theme_bw() + 
@@ -71,8 +76,35 @@
     ease_aes('quartic-in-out')
   
   animate(animated, fps = 0.5, width = 800, height = 495) 
-  anim_save(filename = "opm_operating_status_snow.gif")
+  anim_save(filename = "images/opm_operating_status_snow.gif")
   
+  # Loop through the static images by each winter season and generate a JPEG
+  seasons <- unique(winter$season)
+  
+  for(y in seasons){
+    #jpeg(paste0("images/", y, ".jpg"), width = 1024, height = 768)
+    print(y)
+    ggplot(winter[winter$season == y, ], aes(d, snow, color = status)) + 
+      theme_bw() + 
+      geom_point(size = 2) +
+      scale_y_continuous(breaks = c(0,3,6,9,12,15), limits = c(0,15)) +
+      scale_x_datetime(breaks = date_breaks("month")) + 
+      theme(text = element_text(size = 10), 
+            axis.text.x = element_text(angle = 45, hjust = 1)) +
+      scale_color_manual(values = color) + 
+      labs(title = paste0("Snow Fall and Government Operating Status ", y), 
+           x = "Days (December-March)",
+           y = "Snowfall in inches",
+           subtitle = "Measured at Ronald Reagan International Airport (DCA): USW00013743",
+           caption = "data sources: https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/ and https://www.ncdc.noaa.gov/cdo-web/") 
+
+    ggsave(paste0("images/year_", y, ".jpg"), plot = last_plot(), 
+           width = 32, height = 20, units = "cm", dpi = 320)
+  }
+
+  # put images together to create a gif, based on code from: 
+  #https://stackoverflow.com/questions/53401370/very-confused-about-how-to-merge-two-images-to-create-a-gif
+    
   # -----------------------------------------------------------------#
   # # Barchart of Snow Fall and Government Operating Status
   # # av.note: doesn't look great hard to see data
