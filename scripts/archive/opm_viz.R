@@ -78,9 +78,8 @@
   animate(animated, fps = 0.5, width = 800, height = 495) 
   anim_save(filename = "images/opm_operating_status_snow.gif")
   
-  # Loop through the static images by each winter season and generate a JPEG
+  # Loop through the static images by each winter season and generate a PNG
   seasons <- unique(winter$season)
-  
   for(y in seasons){
     print(y)
     ggplot(winter[winter$season == y, ], aes(d, snow, color = status)) + 
