@@ -47,6 +47,24 @@
     dplyr::filter(status != "UNKNOWN") %>% 
     dplyr::filter(status != "Shut Down") ##dropping because also not related to weather
   
-  ## write data to csv
+  ## Fix data quality issues (on merging the datasets noticed these issues) 
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/00/1/25/Closed_35/"] <- "2000-01-26"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/06/6/26/Unscheduled-Leave_146/"] <- "2006-06-27"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/06/6/27/Unscheduled-Leave_156/"] <- "2006-06-28"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/07/2/14/Unscheduled-Leave_180/"] <- "2007-02-15"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/10/2/4/Unscheduled-LeaveEarly-Dismissal_229/"] <- "2010-02-05"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/11/2/1/Open-with-option-for-Unscheduled-Leave-or-Unscheduled-Telework_350/"] <- "2011-02-02"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/13/1/24/Open-with-Option-for-Unscheduled-Leave-or-Unscheduled-Telework_498/"] <- "2013-01-25"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/13/3/6/Open_521/"] <- "2013-03-07"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/14/1/21/Open---2-hours-Delayed-Arrival---With-Option-for-Unscheduled-Leave-or-Unscheduled-Telework_581/"] <- "2014-01-22"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/17/3/14/Open_742/"] <- "2017-03-15"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/18/3/21/Open---2-hours-Delayed-Arrival---With-Option-for-Unscheduled-Leave-or-Unscheduled-Telework_822/"] <- "2018-03-22"
+  opm$date[opm$path == "https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/19/1/29/Open---3-hours-Delayed-Arrival---With-Option-for-Unscheduled-Leave-or-Unscheduled-Telework_881/"] <- "2019-01-30"
+  
+  ##note: not all dates are unique (five duplicates)
+  length(unique(opm$date)) == length(nrow(opm))
+  length(unique(opm$date))
+  
+  ## Write data to csv
   readr::write_csv(opm, here::here("data/opm_status_data.csv"))
   
