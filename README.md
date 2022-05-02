@@ -1,6 +1,6 @@
 # OPM Operating Status
 
-**Status**: In progress of being updated
+**Status**: Complete
 
 I scraped the OPM federal government operating status archive page to get the operating status between January 15, 1998 and January 27, 2022 (website found [here]( https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/status-archives/)). 
 
