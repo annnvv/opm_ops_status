@@ -10,4 +10,4 @@ I combined the two datasets and plotted the snow fall totals by date and federal
 
 ## 2024 Update
 
-I decided to refactor the code here a bit. For one reason, I read a WaPo article about the ('DC Snow Hole')[https://www.washingtonpost.com/weather/2023/12/27/dc-snow-hole/] (paywall) and realized that DCA might not be the best weather station to use for this analysis. Instead, I decided to aggregate snow data from three weather stations (BWI, IAD, and the National Arobretum). Another reason was that `httr` was deprecated and superseded by `httr2` and I wanted to learn more about `httr2`. 
+I decided to refactor the code here a bit. For one reason, I read a WaPo article about the ['DC Snow Hole'](https://www.washingtonpost.com/weather/2023/12/27/dc-snow-hole/) (paywall) and realized that DCA might not be the best weather station to use for this analysis. Instead, I decided to aggregate snow data from three weather stations (BWI, IAD, and the National Arobretum). Another reason was that `httr` was deprecated and superseded by `httr2` and I wanted to learn more about `httr2`. 
