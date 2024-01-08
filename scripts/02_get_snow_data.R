@@ -8,9 +8,9 @@
   config <- config::get(file = here("_auth/config.yaml"))
   
   # Fetch data from the GHCND dataset (Daily Summaries) SNOW for Station ID USW00013743 (Ronald Reagan Airport)
-  get_snow_data <- function(year){
+  get_snow_data <- function(year, station){
     weather_query <- paste0("https://www.ncdc.noaa.gov/cdo-web/api/v2/data?", 
-                          "datasetid=GHCND&datatypeid=SNOW&stationid=GHCND:USW00013743&units=standard&startdate=", 
+                          "datasetid=GHCND&datatypeid=SNOW&stationid=", station, "&units=standard&startdate=", 
                           year,"-01-01&enddate=", year,"-12-31&limit=1000")
     
     req <- httr2::request(weather_query) |> 
@@ -22,7 +22,6 @@
     # resp |> resp_content_type() ##returns JSON by default!!
     
     data <- resp |> resp_body_json(simplifyVector = TRUE)
-    data$results
 
     df <- data$results[c("date", "value")]
     
@@ -33,7 +32,7 @@
   
   for(i in c(1998:2022)){
     print(i)
-    df <- get_snow_data(i)
+    df <- get_snow_data(i, station = 'GHCND:USW00013743')
     all_snow_data <- base::rbind(all_snow_data, df)
   }
   rm(i)
