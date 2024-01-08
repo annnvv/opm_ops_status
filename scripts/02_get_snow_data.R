@@ -1,6 +1,6 @@
   library(here)
   library(config)
-  library(httr)
+  library(httr2)
   library(jsonlite)
   library(lubridate)
   library(readr)
@@ -13,12 +13,18 @@
                           "datasetid=GHCND&datatypeid=SNOW&stationid=GHCND:USW00013743&units=standard&startdate=", 
                           year,"-01-01&enddate=", year,"-12-31&limit=1000")
     
-    data <- httr::GET(weather_query, add_headers(Token = config$noaa_token))
-    # httr::status_code(data)
+    req <- httr2::request(weather_query) |> 
+      httr2::req_headers(Token = config$noaa_token) |>
+      httr2:req_retry(max_tries = 3)
     
-    data_text <- httr::content(data, "text")
-    data_parsed <- jsonlite::fromJSON(data_text) 
-    df <- data_parsed$results[c("date", "value")]
+    resp <- httr2::req_perform(req) 
+    
+    # resp |> resp_content_type() ##returns JSON by default!!
+    
+    data <- resp |> resp_body_json(simplifyVector = TRUE)
+    data$results
+
+    df <- data$results[c("date", "value")]
     
     return(df)
   }
