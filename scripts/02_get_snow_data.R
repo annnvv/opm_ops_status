@@ -20,7 +20,6 @@
       httr2::req_retry(max_tries = 3)
     
     resp <- httr2::req_perform(req) 
-    
     # resp |> resp_content_type() ##returns JSON by default!!
     
     data <- resp |> resp_body_json(simplifyVector = TRUE)
@@ -53,7 +52,10 @@
   
   all_snow_data_aggregated <- all_snow_data |> 
     dplyr::group_by(date) |>
-    dplyr::summarize(mean_snow_inch = mean(value))
+    dplyr::summarize(mean_snow_inch = base::mean(value, na.rm = TRUE))
+  
+  # table(all_snow_data_aggregated$mean_snow_inch !=0)
+  # prop.table(table(all_snow_data_aggregated$mean_snow_inch !=0))*100 ##only 3.5% of days have snow fall greater than zero
   
   readr::write_csv(all_snow_data_aggregated, here("data/dc_snow_data.csv"))
   
